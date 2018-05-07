@@ -1,8 +1,8 @@
 package DSAProject;
 
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Stack;
+import java.io.*;
+import java.util.*;
+import javax.swing.JLabel;
 
 public class Control {
     private int [][] gameBoard = new int[4][4];
@@ -13,11 +13,11 @@ public class Control {
     private ArrayList<Integer> spaceY = new ArrayList<Integer>();
     protected int x,y;
     public String playerName;
-    private boolean movedFlag;
-    protected int highScore, currentScore, playerScore = 0;
+    private boolean movedFlag = true;
+    protected double highScore, currentScore, playerScore = 0;
 //------------------------------------------------------------------------------
-    public Control(){
-        this.highScore = 0;
+    public Control() {
+        
     }
 //------------------------------------------------------------------------------
     public Control(String name){
@@ -25,9 +25,7 @@ public class Control {
     }
 //------------------------------------------------------------------------------	
     public void random() {
-        if (checkEmptySlot() == true ) {
-            return;
-        }
+        if (!checkEmptySlot()) return;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (gameBoard[i][j] == 0) {
@@ -53,7 +51,7 @@ public class Control {
     }
 //------------------------------------------------------------------------------    
     public void pushUp() {
-        updateStack();
+        if(movedFlag == true) updateStack();
         movedFlag = false;
         for (int y=0;y<4;y++) {
             boolean plusalready=false;
@@ -69,36 +67,32 @@ public class Control {
                         gameBoard[0][y]=value;
                         gameBoard[x][y]=0;
                         movedFlag = true;
-                        System.out.print("Case 1 Push up \n");
                     }
-                        
+                
                     else if (gameBoard[preX][y] != value) {
                         gameBoard[preX+1][y] = value;
                         if (preX+1==x) {
                             gameBoard[x][y] = value;
-                            System.out.print("#value \n");
+                            
                         }   
                         else if (preX+1!= x) {
                             gameBoard[x][y]= 0;
                             movedFlag = true;
-                            System.out.print("ww \n");
                         }
                     }
                     else {
                         if (plusalready==true) {
                             gameBoard[preX+1][y]= value;
                             gameBoard[x][y]=0;
-                           plusalready=false;
+                            plusalready=false;
                             movedFlag = true;
-                            System.out.print("plus true");
                         }
                         else {
                             gameBoard[preX][y]*= 2;
-                            gameBoard[x][y]= 0;
+                            gameBoard[x][y]	= 0;
                             plusalready=true;
                             currentScore+=gameBoard[preX][y];
                             movedFlag = true;
-                            System.out.print("plus false");
                         }
                     }
                 }
@@ -107,7 +101,7 @@ public class Control {
     }
 //------------------------------------------------------------------------------   
     public void pushDown() {
-        updateStack();
+        if(movedFlag == true) updateStack();
         movedFlag = false;
         for (int y=0;y<4;y++) {
             boolean plusalready=false;
@@ -154,7 +148,7 @@ public class Control {
     }
 //------------------------------------------------------------------------------   
     public void pushRight() {
-        updateStack();
+        if(movedFlag == true) updateStack();
         movedFlag = false;
         for (int x=0;x<4;x++) {
             boolean plusalready=false;
@@ -201,7 +195,7 @@ public class Control {
     }
 //------------------------------------------------------------------------------    
     public void pushLeft() {
-        updateStack();
+        if(movedFlag == true) updateStack();
         movedFlag = false;
         for (int x=0;x<4;x++) {
             boolean plusalready=false;
@@ -247,25 +241,15 @@ public class Control {
         }
     }
 //------------------------------------------------------------------------------
-    public void newGame() {
+    public void newGame() throws IOException {
         for(int i = 0; i < 4; i++) 
             for (int j = 0; j < 4; j++) {
                 gameBoard[i][j] = 0;
             }
         random();
         random();
-        setHighScore();
+        updateHighScore();
         setCurrentScore(0);
-    }
-//------------------------------------------------------------------------------
-    public void testColor() {
-        int value = 2;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                gameBoard[i][j] = value;
-                value *=2;
-            }
-        }
     }
 //------------------------------------------------------------------------------
     public int getStackSize() {
@@ -284,11 +268,15 @@ public class Control {
         return (movedFlag);
     }
 //------------------------------------------------------------------------------
+    public void setMovedFlag() {
+        movedFlag = false;
+    }
+//------------------------------------------------------------------------------
     public boolean checkEmptySlot() {
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++)
-                if (gameBoard[i][j] == 0) return false;
-        return true;
+                if (gameBoard[i][j] == 0) return true;
+        return false;
     }
 //------------------------------------------------------------------------------    
     public boolean Winner() {
@@ -299,14 +287,14 @@ public class Control {
     }
 //------------------------------------------------------------------------------    
     public boolean Loser() {
-        return(canMove() == false && checkEmptySlot() == true);
+        return(canMove() == false && checkEmptySlot() == false);
     }
 //------------------------------------------------------------------------------
     public boolean checkAbilityMoving(){
-        if(x + 1 < 4 && gameBoard[x][y] == gameBoard[x+1][y]) return true; //Moving Up
-        else if(x - 1 >= 0 && gameBoard[x][y] == gameBoard[x-1][y]) return true; //Moving Down
-        else if(y + 1 < 4 && gameBoard[x][y] == gameBoard[x][y+1]) return true; //Moving Right
-        else if(y - 1 >= 0 && gameBoard[x][y] == gameBoard[x][y-1]) return true; //Moving Left
+        if(x + 1 < 4 && gameBoard[x][y] == gameBoard[x+1][y]) return true; //Moving Up Case
+        else if(x - 1 >= 0 && gameBoard[x][y] == gameBoard[x-1][y]) return true; //Moving Down Case
+        else if(y + 1 < 4 && gameBoard[x][y] == gameBoard[x][y+1]) return true; //Moving Right Case
+        else if(y - 1 >= 0 && gameBoard[x][y] == gameBoard[x][y-1]) return true; //Moving Left Case
         return false;
     }
 //------------------------------------------------------------------------------   
@@ -317,7 +305,7 @@ public class Control {
         return false;
     }
 //------------------------------------------------------------------------------
-        public void updateStack() {
+    public void updateStack() {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 EStack.push(i);
@@ -329,7 +317,7 @@ public class Control {
     }
 //------------------------------------------------------------------------------    
     public void Undo() {
-        currentScore = (int) SStack.pop();
+        currentScore = (double) SStack.pop();
         for (int i = 0; i < 16; i++) {
             int tempV = (int) EStack.pop();
             int tempY = (int) EStack.pop();
@@ -338,24 +326,151 @@ public class Control {
         }
     }
 //------------------------------------------------------------------------------    
-    public void setHighScore(){
-        highScore = (currentScore > highScore) ? currentScore : highScore;
-	}
-//------------------------------------------------------------------------------    
-    public long getHighScore() {
+    public double getHighScore() {
         return highScore;
     }
 //------------------------------------------------------------------------------   
-    public void setHighScore(int highScore) {
+    public void setHighScore(double highScore) {
         this.highScore = highScore;
     }
 //------------------------------------------------------------------------------    
-    public long getCurrentScore() {
+    public double getCurrentScore() {
         return currentScore;
     }
 //------------------------------------------------------------------------------    
-    public void setCurrentScore(int currentScore) {
+    public void setCurrentScore(double currentScore) {
         this.currentScore = currentScore;
     }
+//------------------------------------------------------------------------------
+    public void updateHighScore() throws IOException {
+        String[] store = new String[10];
+        FileReader fr = new FileReader ("LeaderBoard.txt");
+        BufferedReader br = new BufferedReader(fr);
+        String line;
+        int index=0;
+        while((line = br.readLine())!= null) {
+             String[] words = line.split("\\s");
+             for (int i=0;i < words.length;i++) store[index++] = words[i];
+	}
+        setHighScore(Double.parseDouble(store[1]));
+        fr.close();
+        br.close();
+    }
+//------------------------------------------------------------------------------
+    public void updateLeaderBoard() {
+        int maxSize = 5;
+        try {
+            String[] store = new String[maxSize*2];
+            String[] Name = new String[maxSize];
+            double[] Score = new double[maxSize];
+            FileReader fr = new FileReader ("LeaderBoard.txt");
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            int index=0;
+            
+                while((line = br.readLine())!= null) {
+                    String[] words = line.split("\\s");
+                    for (int i=0;i < words.length;i++) store[index++] = words[i];
+		}
+                int indexName = 0, indexScore = 0;
+                for (int i = 0;i < store.length;i++) {
+                    if(i == 0) Name[indexName++] = store[0];
+                    else {
+                        if(i%2==0) Name[indexName++] = store[i];
+			else Score[indexScore++] = Double.parseDouble(store[i]);
+                    }
+                }
+                double playerScore = getCurrentScore();
+                for (int i =0;i<Score.length;i++) {
+                    if (playerScore >Score[i] && i+1 <Score.length) {	
+			Score[i+1]=Score[i];
+			Name[i+1]=Name[i];
+			Score[i]=playerScore;
+			Name[i]=playerName;
+			playerScore=i;
+                    }
+                    if (playerScore < Score[i]) continue;
+                    else {
+			Score[i]=playerScore;
+			Name[i]=playerName;
+                    }
+                }
+		FileOutputStream out = new FileOutputStream("LeaderBoard.txt");
+		PrintWriter pw = new PrintWriter(out);
+		for(int i=0;i<Name.length;i++) pw.println(Name[i]+" " + Score[i]);
+		pw.close();
+		out.close();
+            
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+	}
+    }
+//------------------------------------------------------------------------------
+    public void showLeaderBoard(JLabel top1, JLabel top2, JLabel top3, JLabel top4, JLabel top5) {
+        try {
+            String[] store = new String[10];
+            FileReader fr = new FileReader ("LeaderBoard.txt");
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            int index = 0;
+            while((line=br.readLine())!=null) {
+                String[] words=line.split("\\s");
+                for (int i=0;i<words.length;i++) store[index++]=words[i];
+            }
+            top1.setText(store[0] + " " + store[1]);
+            top2.setText(store[2] + " " + store[3]);
+            top3.setText(store[4] + " " + store[5]);
+            top4.setText(store[6] + " " + store[7]);
+            top5.setText(store[8] + " " + store[9]);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+	}
+    }
+//------------------------------------------------------------------------------
+    public void updateResumeData() throws FileNotFoundException, IOException {
+        FileOutputStream out = new FileOutputStream("ResumeData.txt");
+        PrintWriter pw = new PrintWriter(out);
+        pw.print(playerName + " " + getCurrentScore() + " " );
+        pw.println();
+        for( int i=0;i<4;i++) {
+            for(int j=0;j<4;j++) {
+                pw.print(gameBoard[i][j]+" ");
+            }
+            pw.println();
+        }
+        pw.close();
+        out.close();
+    }
+//------------------------------------------------------------------------------
+    public void resume() throws FileNotFoundException, IOException {
+        FileReader fr = new FileReader ("ResumeData.txt");
+        BufferedReader br = new BufferedReader(fr);
+        String line;
+        int newmatrix[] = new int[16];
+        int index=0;
+        boolean flagName = false, flagScore = false;
+        while((line=br.readLine())!=null) {
+            String[] number=line.split("\\s");
+            for(int j=0;j<number.length;j++) {
+            if (!flagName) {
+                playerName = number[0];
+                flagName = true;
+            }
+            else if(!flagScore) {
+                setCurrentScore(Double.parseDouble(number[1]));
+                flagScore = true;
+            }
+            else newmatrix[index++]=Integer.parseInt(number[j]);
+            }
+        }
+        int newindex=0;
+        for (int i=0;i<4;i++) {
+            for (int j=0;j<4;j++) {
+                gameBoard[i][j]=newmatrix[newindex++];
+            }
+        }
+    }
+//------------------------------------------------------------------------------    
 }
-//------------------------------------------------------------------------------	
